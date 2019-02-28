@@ -29,8 +29,9 @@ public class MainActivity extends AppCompatActivity
 
     // TODO: define analytics object
     private FirebaseAnalytics mFBAnalytics;
-    // TODO: define Remote Config object
 
+    // TODO: define Remote Config object
+    private FirebaseRemoteConfig mFBConnfig;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,16 +42,22 @@ public class MainActivity extends AppCompatActivity
         mFBAnalytics = FirebaseAnalytics.getInstance(this);
 
         // TODO: Get the Remote Config instance
+        mFBConnfig = FirebaseRemoteConfig.getInstance();
 
         // TODO: Wait 5 seconds before counting this as a session
         mFBAnalytics.setMinimumSessionDuration(MIN_SESSION_DURATION);
+
         // TODO: Add Remote Config Settings
         // Enable developer mode to perform more rapid testing.
         // Config fetches are normally limited to 5 per hour. This
         // enables many more requests to facilitate testing.
-
+        FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder()
+                .setDeveloperModeEnabled(BuildConfig.DEBUG)
+                .build();
+        mFBConnfig.setConfigSettings(configSettings);
 
         // TODO: Get the default parameter settings from the XML file
+        mFBConnfig.setDefaults(R.xml.firstlook_config_params);
 
         // set up button click handlers
         findViewById(R.id.btn1).setOnClickListener(this);
@@ -66,9 +73,25 @@ public class MainActivity extends AppCompatActivity
         // If in developer mode cacheExpiration is set to 0 so each fetch will retrieve values from
         // the server.
         // TODO: Set the cache duration for developer testing
+        if (mFBConnfig.getInfo().getConfigSettings().isDeveloperModeEnabled()) {
+            PROMO_CACHE_DURATION = 0;
+        }
 
         // TODO: fetch the values from the Remote Config service
+        mFBConnfig.fetch(PROMO_CACHE_DURATION)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
 
+                        if (task.isSuccessful()) {
+                            Log.i(TAG, "Promo check was successful");
+                            mFBConnfig.activateFetched();
+                        } else {
+                            Log.e(TAG, "Promo check failed");
+                        }
+                        showPromoButton();
+                    }
+                });
     }
 
     private void showPromoButton() {
@@ -78,6 +101,8 @@ public class MainActivity extends AppCompatActivity
         String promoMsg = "";
 
         // TODO: get the promo setting from Remote Config
+        showBtn = mFBConnfig.getBoolean(CONFIG_PROMO_ENABLED_KEY);
+        promoMsg = mFBConnfig.getString(CONFIG_PROMO_MESSAGE_KEY);
 
         Button btn = (Button) findViewById(R.id.btnPromo);
         btn.setVisibility(showBtn ? View.VISIBLE : View.INVISIBLE);
