@@ -16,7 +16,7 @@ import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 
 public class MainActivity extends AppCompatActivity
-    implements View.OnClickListener {
+        implements View.OnClickListener {
     private final String TAG = "FB_FIRSTLOOK";
 
     // Firebase Remote Config settings
@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity
     private final int MIN_SESSION_DURATION = 5000;
 
     // TODO: define analytics object
-
+    private FirebaseAnalytics mFBAnalytics;
     // TODO: define Remote Config object
 
 
@@ -38,11 +38,12 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
 
         // TODO: Retrieve an instance of the Analytics package
+        mFBAnalytics = FirebaseAnalytics.getInstance(this);
 
         // TODO: Get the Remote Config instance
 
         // TODO: Wait 5 seconds before counting this as a session
-
+        mFBAnalytics.setMinimumSessionDuration(MIN_SESSION_DURATION);
         // TODO: Add Remote Config Settings
         // Enable developer mode to perform more rapid testing.
         // Config fetches are normally limited to 5 per hour. This
@@ -78,7 +79,7 @@ public class MainActivity extends AppCompatActivity
 
         // TODO: get the promo setting from Remote Config
 
-        Button btn = (Button)findViewById(R.id.btnPromo);
+        Button btn = (Button) findViewById(R.id.btnPromo);
         btn.setVisibility(showBtn ? View.VISIBLE : View.INVISIBLE);
         btn.setText(promoMsg);
     }
@@ -117,11 +118,11 @@ public class MainActivity extends AppCompatActivity
         Log.d(TAG, "Button click logged: " + btnName);
 
         // TODO: Log the button press as an analytics event
-
+        mFBAnalytics.logEvent(btnName, params);
     }
 
     private void setStatus(String text) {
-        TextView tvStat = (TextView)findViewById(R.id.tvStatus);
+        TextView tvStat = (TextView) findViewById(R.id.tvStatus);
         tvStat.setText(text);
     }
 }

@@ -18,7 +18,7 @@ public class PromoScreen extends AppCompatActivity
         setContentView(R.layout.activity_promo_screen);
 
         // TODO: Get a reference to Firebase analytics
-
+        mFBAnalytics=FirebaseAnalytics.getInstance(this);
     }
 
     @Override
@@ -29,7 +29,7 @@ public class PromoScreen extends AppCompatActivity
         // analytics event, which is provided by Firebase
         Bundle params = new Bundle();
         params.putString(FirebaseAnalytics.Param.ITEM_ID, "Promo Item");
-
+        mFBAnalytics.logEvent(FirebaseAnalytics.Event.VIEW_ITEM,params);
     }
 
     @Override
@@ -39,7 +39,7 @@ public class PromoScreen extends AppCompatActivity
             // Firebase analytics event
             Bundle params = new Bundle();
             params.putString(FirebaseAnalytics.Param.ITEM_ID, "Promo Item");
-
+            mFBAnalytics.logEvent(FirebaseAnalytics.Event.ECOMMERCE_PURCHASE,params);
 
         }
     }
