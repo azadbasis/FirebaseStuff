@@ -1,0 +1,19 @@
+
+  =============Analytics===============
+
+        *Free and unlimited (up to 500 events per app with 25 properties)
+        *Predefined event types and parameters for various scenarios
+        *Ecommerce,travel,real estate, games,education, and more
+        *Integrates with other Firebase features
+
+      *Records common events and demographic data automatically.
+      *First opens.in-app purchases,installs and uninstalls,etc.
+      *Firebase Authentication
+      *Firebase console
+
+
+          =========Analytics:=========
+
+            adb shell setprop log.tag.FA VERBOSE
+            adb shell setprop log.tag.FA-SVC VERBOSE
+            adb logcat -v time -s FA FA-SVC
