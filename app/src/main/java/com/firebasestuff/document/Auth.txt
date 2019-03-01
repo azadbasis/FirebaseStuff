@@ -1,0 +1,15 @@
+
+     ======Email And Password Authentication====
+
+        *FirebaseAuth.getInstance();
+        *AuthStateListener();
+        *createUserWithEmailAndPassword(username,password)
+        *signInWithEmailAdPassword(username,password)
+        *signOut()
+
+        =====Firebase Authentication Error Handling=====
+
+        addOFailureListener() ====>detect an error
+        FirebaseAuthInvalidAuthCredentialsException ====>Indicate password supply in sign is incorrect
+        FirebaseAuthInvalidUserException===>Email is correct but there is no such user.
+        FirebaseAuthUserCollisionException===>This email is already in use

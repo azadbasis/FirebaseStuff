@@ -20,11 +20,12 @@ import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseUser;
 
 public class SignInActivity extends AppCompatActivity
-    implements View.OnClickListener{
+        implements View.OnClickListener {
     private final String TAG = "FB_SIGNIN";
 
     // TODO: Add Auth members
-
+    private FirebaseAuth mAuth;
+    private FirebaseAuth.AuthStateListener mAuthListener;
 
     private EditText etPass;
     private EditText etEmail;
@@ -42,14 +43,24 @@ public class SignInActivity extends AppCompatActivity
         findViewById(R.id.btnSignIn).setOnClickListener(this);
         findViewById(R.id.btnSignOut).setOnClickListener(this);
 
-        etEmail = (EditText)findViewById(R.id.etEmailAddr);
-        etPass = (EditText)findViewById(R.id.etPassword);
+        etEmail = (EditText) findViewById(R.id.etEmailAddr);
+        etPass = (EditText) findViewById(R.id.etPassword);
 
         // TODO: Get a reference to the Firebase auth object
-
+        mAuth = FirebaseAuth.getInstance();
 
         // TODO: Attach a new AuthListener to detect sign in and out
-
+        mAuthListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                if (user != null) {
+                    Log.d(TAG, "Signed in: " + user.getUid());
+                } else {
+                    Log.d(TAG, "Currently Signed out");
+                }
+            }
+        };
 
         updateStatus();
     }
@@ -62,6 +73,7 @@ public class SignInActivity extends AppCompatActivity
     public void onStart() {
         super.onStart();
         // TODO: add the AuthListener
+        mAuth.addAuthStateListener(mAuthListener);
 
     }
 
@@ -69,7 +81,9 @@ public class SignInActivity extends AppCompatActivity
     public void onStop() {
         super.onStop();
         // TODO: Remove the AuthListener
-
+        if (mAuthListener != null) {
+            mAuth.removeAuthStateListener(mAuthListener);
+        }
     }
 
     @Override
@@ -99,7 +113,7 @@ public class SignInActivity extends AppCompatActivity
             etEmail.setError("Email Required");
             return false;
         }
-        if (password.isEmpty()){
+        if (password.isEmpty()) {
             etPass.setError("Password Required");
             return false;
         }
@@ -108,21 +122,18 @@ public class SignInActivity extends AppCompatActivity
     }
 
     private void updateStatus() {
-        TextView tvStat = (TextView)findViewById(R.id.tvSignInStatus);
+        TextView tvStat = (TextView) findViewById(R.id.tvSignInStatus);
         // TODO: get the current user
-
-        /*
+        FirebaseUser user = mAuth.getCurrentUser();
         if (user != null) {
             tvStat.setText("Signed in: " + user.getEmail());
-        }
-        else {
+        } else {
             tvStat.setText("Signed Out");
         }
-        */
     }
 
     private void updateStatus(String stat) {
-        TextView tvStat = (TextView)findViewById(R.id.tvSignInStatus);
+        TextView tvStat = (TextView) findViewById(R.id.tvSignInStatus);
         tvStat.setText(stat);
     }
 
@@ -134,13 +145,37 @@ public class SignInActivity extends AppCompatActivity
         String password = etPass.getText().toString();
 
         // TODO: sign the user in with email and password credentials
+        mAuth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful()) {
+                            Toast.makeText(SignInActivity.this, "Signed In  ", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(SignInActivity.this, "Sig in failed ", Toast.LENGTH_SHORT).show();
+                        }
+                        updateStatus();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        if (e instanceof FirebaseAuthInvalidCredentialsException) {
+                            updateStatus("Invalid Password.");
+                        } else if (e instanceof FirebaseAuthInvalidUserException) {
+                            updateStatus("No account with this email.");
+                        } else {
+                            updateStatus(e.getLocalizedMessage());
+                        }
+                    }
+                });
 
 
     }
 
     private void signUserOut() {
         // TODO: sign the user out
-
+        mAuth.signOut();
         updateStatus();
     }
 
@@ -153,6 +188,28 @@ public class SignInActivity extends AppCompatActivity
 
         // TODO: Create the user account
 
+        mAuth.createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
 
+                        if (task.isSuccessful()) {
+                            Toast.makeText(SignInActivity.this, "User was created ", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(SignInActivity.this, "Account creation failed ", Toast.LENGTH_SHORT).show();
+                        }
+
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        if (e instanceof FirebaseAuthUserCollisionException) {
+                            updateStatus("This email is already in use ");
+                        } else {
+                            updateStatus(e.getLocalizedMessage());
+                        }
+                    }
+                });
     }
 }
